@@ -144,6 +144,61 @@ TimeOfDay? _parseTimeString(String timeStr) {
   }
 }
 
+ Stream<List<Map<String, dynamic>>> getCombinedBookingsStream() {
+  Query bookingsQuery = _firestore.collection('bookings');
+  Query groundBookingsQuery = _firestore.collection('groundBookings');
+  return bookingsQuery.snapshots().asyncMap((bookingsSnapshot) async {
+    
+    String globalGroundName = 'Unknown Ground';
+    try {
+      final groundQuery = await _firestore.collection('custgrounddetails').limit(1).get();
+      if (groundQuery.docs.isNotEmpty) {
+        globalGroundName = groundQuery.docs.first.data()['groundName'] ?? 'Unknown Ground';
+      }
+    } catch (e) {
+      print("Error fetching ground details: $e");
+    }
+
+    List<Map<String, dynamic>> combinedResults = [];
+    for (var doc in bookingsSnapshot.docs) {
+      final bookingData = doc.data() as Map<String, dynamic>;
+      final bookingModel = BookingModel.fromFirestore(bookingData, doc.id);
+
+      combinedResults.add({
+        'booking': bookingModel,
+        'groundName': globalGroundName,
+        'sourceTable': 'bookings',
+      });
+    }
+    try {
+      final groundBookingsSnapshot = await groundBookingsQuery.get();
+      
+      for (var doc in groundBookingsSnapshot.docs) {
+        final groundBookingData = doc.data() as Map<String, dynamic>;
+        final bookingModel = BookingModel.fromFirestore(groundBookingData, doc.id);
+
+        combinedResults.add({
+          'booking': bookingModel,
+          'groundName': globalGroundName,
+          'sourceTable': 'groundBookings',
+        });
+      }
+    } catch (e) {
+      print("Error reading secondary groundBookings table: $e");
+    }
+    combinedResults.sort((a, b) {
+      final DateTime? dateA = (a['booking'] as BookingModel).bookingDate;
+      final DateTime? dateB = (b['booking'] as BookingModel).bookingDate;
+      if (dateA == null) return 1;
+      if (dateB == null) return -1;
+      return dateB.compareTo(dateA); 
+    });
+
+    return combinedResults;
+  });
+}
+
+
 /// Fetch bookings as typed models
 Stream<List<BookingModel>> getBookingsStream({
   DateTime? startDate,

@@ -154,81 +154,60 @@ class _BookingsState extends State<Bookings> {
             ),
             SizedBox(height: 25),
             Expanded(
-              child: StreamBuilder<List<BookingModel>>(
-                stream: _bookingService.getBookingsStream(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'Error loading bookings: ${snapshot.error}',
-                        style: const TextStyle(color: Colors.redAccent),
-                      ),
-                    );
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.greenAccent,
-                      ),
-                    );
-                  }
+              child: Expanded(
+  child: StreamBuilder<List<Map<String, dynamic>>>(
+    // 🔥 Cleaned: Removed arguments to fetch everything
+    stream: _bookingService.getCombinedBookingsStream(), 
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return Center(
+          child: Text('Error loading bookings: ${snapshot.error}', style: const TextStyle(color: Colors.redAccent)),
+        );
+      }
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator(color: Colors.greenAccent));
+      }
 
-                  final docs = (snapshot.data ?? []).where((booking) {
-                    if (startDate == null ||
-                        endDate == null) {
-                      return false;
-                    }
+      // 🔥 Cleaned: No more client-side date filtering! We show the entire list.
+      final docs = snapshot.data ?? [];
 
-                    return booking.bookingDate.isAfter(
-                          startDate!.subtract(const Duration(microseconds: 1)),
-                        ) &&
-                        booking.bookingDate.isBefore(
-                          endDate!.add(const Duration(microseconds: 1)),
-                        );
-                  }).toList();
+      if (docs.isEmpty) {
+        return const Center(
+          child: Text('No bookings found.', style: TextStyle(color: Colors.grey, fontSize: 16)),
+        );
+      }
 
-                  if (docs.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'No bookings found.',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                    );
-                  }
+      return ListView.builder(
+        itemCount: docs.length,
+        physics: const BouncingScrollPhysics(),
+        itemBuilder: (context, index) {
+          final currentItem = docs[index];
+          final BookingModel booking = currentItem['booking'];
+          final String groundName = currentItem['groundName'] ?? 'Unknown Ground';
 
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    physics: const BouncingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      final booking = docs[index];
-                      String formattedTime = '--:-- - --:--';
-                      if (booking.inTime != null && booking.outTime != null) {
-                        final inTimeStr = _formatTime(booking.inTime!);
-                        final outTimeStr = _formatTime(booking.outTime!);
-                        formattedTime = '$inTimeStr - $outTimeStr';
-                      } else if (booking.slotTime != null) {
-                        formattedTime = booking.slotTime!;
-                      }
-                      String formattedDate = '--/--/----';
-                      formattedDate = _formatDate(booking.bookingDate);
+          String formattedTime = '--:-- - --:--';
+          if (booking.inTime != null && booking.outTime != null) {
+            formattedTime = '${_formatTime(booking.inTime!)} - ${_formatTime(booking.outTime!)}';
+          } else if (booking.slotTime != null) {
+            formattedTime = booking.slotTime!;
+          }
 
-                      return _buildBookingCard(
-                        docId: booking.id,
-                        name: booking.customerName.isEmpty
-                            ? 'Unknown Customer'
-                            : booking.customerName,
-                        phone: booking.phoneNumber.isEmpty
-                            ? 'No Phone'
-                            : booking.phoneNumber,
-                        sport: booking.sport.isEmpty ? 'N/A' : booking.sport,
-                        date: formattedDate,
-                        time: formattedTime,
-                        amount: booking.amount.toString(),
-                      );
-                    },
-                  );
-                },
-              ),
+          String formattedDate = booking.bookingDate != null ? _formatDate(booking.bookingDate) : '--/--/----';
+
+          return _buildBookingCard(
+            docId: booking.id,
+            name: booking.customerName.isEmpty ? 'Unknown Customer' : booking.customerName,
+            phone: booking.phoneNumber.isEmpty ? 'No Phone' : booking.phoneNumber,
+            sport: booking.sport.isEmpty ? groundName : '${booking.sport} ($groundName)',
+            date: formattedDate,
+            time: formattedTime,
+            amount: booking.amount.toString(),
+          );
+        },
+      );
+    },
+  ),
+)
             ),
           ],
         ),
@@ -592,8 +571,8 @@ class _BookingsState extends State<Bookings> {
                                                     ? Colors.red
                                                     : isSelected
                                                     ? Colors.green
-                                                    : Colors.grey.withValues(
-                                                        alpha: 0.3,
+                                                    : Colors.grey.withOpacity(
+                                                        0.3,
                                                       ),
                                                 width: 2,
                                               ),
@@ -698,6 +677,16 @@ class _BookingsState extends State<Bookings> {
                                 selectedSlotTime: selectedSlotTime,
                                 selectedSlotIndex: selectedSlotIndex,
                               );
+                              setState(() {
+                                startDate = DateTime(
+                                  selectedDate!.year,
+                                  selectedDate!.month,
+                                  selectedDate!.day,
+                                );
+                                endDate = startDate!
+                                    .add(const Duration(days: 1))
+                                    .subtract(const Duration(microseconds: 1));
+                              });
 
                               if (context.mounted) Navigator.pop(context);
                               if (context.mounted) Navigator.pop(context);
