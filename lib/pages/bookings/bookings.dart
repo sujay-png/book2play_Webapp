@@ -36,6 +36,7 @@ class _BookingsState extends State<Bookings> {
     super.dispose();
   }
 
+  //======================FORMAT DATETIME=========================
   String _formatTime(DateTime dateTime) {
     int hour = dateTime.hour;
     int minute = dateTime.minute;
@@ -53,6 +54,7 @@ class _BookingsState extends State<Bookings> {
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
 
+  //=========================TIME SLOTS LIST======================================
   final List<SlotData> _slots = [
     SlotData(time: '06:00 AM - 07:00 AM', basePrice: 1000),
     SlotData(time: '07:00 AM - 08:00 AM', basePrice: 1000),
@@ -84,6 +86,7 @@ class _BookingsState extends State<Bookings> {
           children: [
             Column(
               children: [
+                //=========================BACK TO DASHBOARD BUTTON============================
                 SizedBox(
                   width: 180,
                   height: 50,
@@ -120,6 +123,7 @@ class _BookingsState extends State<Bookings> {
                   'Update bookings Manually',
                   style: TextStyle(fontSize: 25, color: Colors.white),
                 ),
+                //=========================ADD NEW BOOKING BUTTON=============================
                 SizedBox(
                   width: 200,
                   height: 50,
@@ -153,61 +157,80 @@ class _BookingsState extends State<Bookings> {
               ],
             ),
             SizedBox(height: 25),
+            //===================== GET BOOKINGS DETAILS FROM BACKEND(2 TABLE COMBINED)=====================================
             Expanded(
               child: Expanded(
-  child: StreamBuilder<List<Map<String, dynamic>>>(
-    // 🔥 Cleaned: Removed arguments to fetch everything
-    stream: _bookingService.getCombinedBookingsStream(), 
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return Center(
-          child: Text('Error loading bookings: ${snapshot.error}', style: const TextStyle(color: Colors.redAccent)),
-        );
-      }
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator(color: Colors.greenAccent));
-      }
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  // 🔥 Cleaned: Removed arguments to fetch everything
+                  stream: _bookingService.getCombinedBookingsStream(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Error loading bookings: ${snapshot.error}',
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
+                      );
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.greenAccent,
+                        ),
+                      );
+                    }
+                    final docs = snapshot.data ?? [];
 
-      // 🔥 Cleaned: No more client-side date filtering! We show the entire list.
-      final docs = snapshot.data ?? [];
+                    if (docs.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No bookings found.',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      );
+                    }
 
-      if (docs.isEmpty) {
-        return const Center(
-          child: Text('No bookings found.', style: TextStyle(color: Colors.grey, fontSize: 16)),
-        );
-      }
+                    return ListView.builder(
+                      itemCount: docs.length,
+                      physics: const BouncingScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final currentItem = docs[index];
+                        final BookingModel booking = currentItem['booking'];
+                        final String groundName =
+                            currentItem['groundName'] ?? 'Unknown Ground';
 
-      return ListView.builder(
-        itemCount: docs.length,
-        physics: const BouncingScrollPhysics(),
-        itemBuilder: (context, index) {
-          final currentItem = docs[index];
-          final BookingModel booking = currentItem['booking'];
-          final String groundName = currentItem['groundName'] ?? 'Unknown Ground';
+                        String formattedTime = '--:-- - --:--';
+                        if (booking.inTime != null && booking.outTime != null) {
+                          formattedTime =
+                              '${_formatTime(booking.inTime!)} - ${_formatTime(booking.outTime!)}';
+                        } else if (booking.slotTime != null) {
+                          formattedTime = booking.slotTime!;
+                        }
 
-          String formattedTime = '--:-- - --:--';
-          if (booking.inTime != null && booking.outTime != null) {
-            formattedTime = '${_formatTime(booking.inTime!)} - ${_formatTime(booking.outTime!)}';
-          } else if (booking.slotTime != null) {
-            formattedTime = booking.slotTime!;
-          }
+                        String formattedDate = booking.bookingDate != null
+                            ? _formatDate(booking.bookingDate)
+                            : '--/--/----';
 
-          String formattedDate = booking.bookingDate != null ? _formatDate(booking.bookingDate) : '--/--/----';
-
-          return _buildBookingCard(
-            docId: booking.id,
-            name: booking.customerName.isEmpty ? 'Unknown Customer' : booking.customerName,
-            phone: booking.phoneNumber.isEmpty ? 'No Phone' : booking.phoneNumber,
-            sport: booking.sport.isEmpty ? groundName : '${booking.sport} ($groundName)',
-            date: formattedDate,
-            time: formattedTime,
-            amount: booking.amount.toString(),
-          );
-        },
-      );
-    },
-  ),
-)
+                        return _buildBookingCard(
+                          docId: booking.id,
+                          name: booking.customerName.isEmpty
+                              ? 'Unknown Customer'
+                              : booking.customerName,
+                          phone: booking.phoneNumber.isEmpty
+                              ? 'No Phone'
+                              : booking.phoneNumber,
+                          sport: booking.sport.isEmpty
+                              ? groundName
+                              : '${booking.sport} ($groundName)',
+                          date: formattedDate,
+                          time: formattedTime,
+                          amount: booking.amount.toString(),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
             ),
           ],
         ),
@@ -215,7 +238,7 @@ class _BookingsState extends State<Bookings> {
     );
   }
 
-  //Delete Bookings
+  //==============================Delete Bookings=======================
 
   Future<void> _handleDelete(String id) async {
     try {
@@ -237,6 +260,7 @@ class _BookingsState extends State<Bookings> {
       }
     }
   }
+  //=========================BOOKINGS LIST CARD================================
 
   Widget _buildBookingCard({
     required String docId,
@@ -322,7 +346,7 @@ class _BookingsState extends State<Bookings> {
       ),
     );
   }
-
+//================================BOOKING CARD LIST DESIGN============================
   Widget _buildMetricColumn(String label, String value, double width) {
     return SizedBox(
       width: width,
@@ -351,6 +375,8 @@ class _BookingsState extends State<Bookings> {
     );
   }
 
+  //=========================ADD BOOKINGS FORM================================
+
   void _showAddBookingDialog(BuildContext context) {
     final FirebaseService bookingService = FirebaseService();
     final nameController = TextEditingController();
@@ -376,7 +402,7 @@ class _BookingsState extends State<Bookings> {
           fontWeight: FontWeight.w500,
           color: Colors.white70,
         );
-
+  //==============================TEXTBOX DESIGN====================================
         InputDecoration customInputDecoration({
           String? hintText,
           Widget? suffixIcon,
@@ -404,6 +430,7 @@ class _BookingsState extends State<Bookings> {
 
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            //===========================FORM STARTS=====================================
             return AlertDialog(
               backgroundColor: Colors.black,
               shape: RoundedRectangleBorder(
@@ -418,6 +445,7 @@ class _BookingsState extends State<Bookings> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+        //=======================HEADINGS===========================================
                       Row(
                         children: [
                           IconButton(
@@ -437,6 +465,7 @@ class _BookingsState extends State<Bookings> {
                           ),
                         ],
                       ),
+                      //=======================CUSTOMER NAME===========================
                       const SizedBox(height: 24),
                       const Text('Customer Name', style: labelStyle),
                       const SizedBox(height: 8),
@@ -444,6 +473,7 @@ class _BookingsState extends State<Bookings> {
                         controller: nameController,
                         decoration: customInputDecoration(),
                       ),
+                      //==========================CUSTOMER PHONE NUMBER=====================
                       const SizedBox(height: 16),
                       const Text('Phone Number', style: labelStyle),
                       const SizedBox(height: 8),
@@ -452,6 +482,7 @@ class _BookingsState extends State<Bookings> {
                         keyboardType: TextInputType.phone,
                         decoration: customInputDecoration(),
                       ),
+                      //========================SPORT NAME=====================
                       const SizedBox(height: 16),
                       const Text('Sport', style: labelStyle),
                       const SizedBox(height: 8),
@@ -460,6 +491,7 @@ class _BookingsState extends State<Bookings> {
                         decoration: customInputDecoration(),
                       ),
                       const SizedBox(height: 16),
+                      //====================DATE FIELD=============================
                       const Text('Date', style: labelStyle),
                       const SizedBox(height: 8),
                       TextFormField(
@@ -492,6 +524,7 @@ class _BookingsState extends State<Bookings> {
                           }
                         },
                       ),
+                      //=========================GET TIME SLOTS LIST====================================
                       const SizedBox(height: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -617,6 +650,7 @@ class _BookingsState extends State<Bookings> {
                           ),
                         ],
                       ),
+                      //=========================AMOUNT FIELD==================================
                       const SizedBox(height: 16),
                       const Text('Amount (₹)', style: labelStyle),
                       const SizedBox(height: 8),
@@ -626,6 +660,8 @@ class _BookingsState extends State<Bookings> {
                         decoration: customInputDecoration(),
                       ),
                       const SizedBox(height: 24),
+                          //==========================ADD BOOKINGS BUTTON ==============================
+
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -637,6 +673,7 @@ class _BookingsState extends State<Bookings> {
                             ),
                             elevation: 0,
                           ),
+                          //==========================ADD BOOKINGS BUTTON LOGIC==============================
                           onPressed: () async {
                             // Validation
                             if (nameController.text.trim().isEmpty ||
@@ -663,9 +700,9 @@ class _BookingsState extends State<Bookings> {
                                 ),
                               ),
                             );
-
+                            //=======================ADD BOOKINGS METHOD==========================
                             try {
-                              // UPDATED: Pass slot data to addBooking
+                             
                               await bookingService.addBooking(
                                 name: nameController.text.trim(),
                                 phone: phoneController.text.trim(),

@@ -18,7 +18,7 @@ class Freeslots extends StatefulWidget {
 }
 
 class _FreeslotsState extends State<Freeslots> {
-  // 1. Updated slots list to match all the custom time ranges your UI had
+ //===================TIE SLOT LIST=================================
   final List<SlotData> _slots = [
     SlotData(time: '06:00 AM - 07:00 AM', basePrice: 1000),
     SlotData(time: '07:00 AM - 08:00 AM', basePrice: 1000),

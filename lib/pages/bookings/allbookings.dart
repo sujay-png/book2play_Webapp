@@ -23,7 +23,7 @@ class _AllbookingsState extends State<Allbookings> {
     int minute = dateTime.minute;
     String period = hour >= 12 ? 'PM' : 'AM';
 
-    // Convert to 12-hour format
+    //=================== Convert to 12-hour format============================
     if (hour > 12) {
       hour -= 12;
     } else if (hour == 0) {
@@ -33,7 +33,7 @@ class _AllbookingsState extends State<Allbookings> {
     return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
   }
 
-  // Helper method to format DateTime to date string (DD/MM/YYYY)
+  //===================== Helper method to format DateTime to date string (DD/MM/YYYY)=================================
   String _formatDate(DateTime dateTime) {
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
@@ -41,6 +41,7 @@ class _AllbookingsState extends State<Allbookings> {
   final FirebaseService _bookingService = FirebaseService();
   @override
   Widget build(BuildContext context) {
+    //===================FILTER LIST================================
     final List<String> tabs = [
       'Today',
       'Tomorrow',
@@ -85,7 +86,6 @@ class _AllbookingsState extends State<Allbookings> {
         });
       }
     }
-
     return sidebar(
       child: SingleChildScrollView(
         child: Padding(
@@ -103,7 +103,7 @@ class _AllbookingsState extends State<Allbookings> {
                     //=============================== Back Button ===============================
                     child: ElevatedButton(
                       onPressed: () {
-                        context.go('/'); // Navigate back to dashboard
+                        context.go('/'); 
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -207,7 +207,7 @@ class _AllbookingsState extends State<Allbookings> {
                 ),
               ),
         
-              //=============================== KPI Boxes Row ===============================
+              //=============================== KPI Boxes Row& UPDATE DASBORD FROM BACKEND  ===============================
               SizedBox(height: 15),
               StreamBuilder<Map<String, dynamic>>(
                      stream: FirebaseService().getDashboardMetricsStream(),
@@ -339,7 +339,7 @@ class _AllbookingsState extends State<Allbookings> {
     );
   }
 
-  //Helper method to build each booking card
+  //=========================Helper method to build each booking card==========================
   Widget _buildBookingCard({
     required String docId,
     required String name,

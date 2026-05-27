@@ -123,6 +123,7 @@ class _ReminderState extends State<Reminder> {
                   ],
                 ),
                 SizedBox(height: 15),
+                //===========================UPDATE KPIBOX=============================
                 Row(
                   spacing: 15,
                   children: [
@@ -153,6 +154,8 @@ class _ReminderState extends State<Reminder> {
                   ],
                 ),
                 SizedBox(height: 25),
+                //=========================GET REMINDER LOGIC==================================
+
                 Expanded(
                   child: StreamBuilder<List<ReminderModel>>(
                     stream: bookingService.getRemindersStream(),
@@ -275,6 +278,7 @@ class _ReminderState extends State<Reminder> {
                                     ),
                                   ],
                                   const SizedBox(height: 16.0),
+                                  //=========================UPDATE REMINDER STATUS AS DONE=====================================
                                   Row(
                                     children: [
                                       if (!isDone)
@@ -331,10 +335,9 @@ class _ReminderState extends State<Reminder> {
     );
   }
 
-  //Delete
+  //==============================Delete=====================================
   Future<void> _handleDelete(String id) async {
     try {
-      // FIX: Triggers decoupled external logic instead of parsing native firebase parameters here
       await _bookingService.deleteReminder(id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -371,8 +374,8 @@ class _ReminderState extends State<Reminder> {
       ),
     );
   }
-  //Popupform for model
-
+  
+//=====================ADD REMINDER POPUP FORM===================================
   void _addreminderform(BuildContext context) {
     final FirebaseService bookingService = FirebaseService();
     final titlecontroller = TextEditingController();
@@ -390,7 +393,7 @@ class _ReminderState extends State<Reminder> {
           fontWeight: FontWeight.w500,
           color:Colors.white70,
         );
-
+//==================TEXTBOX DESIGN================================
         InputDecoration customInputDecoration({
           String? hintText,
           Widget? suffixIcon,
@@ -424,9 +427,7 @@ class _ReminderState extends State<Reminder> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
            
-          ),
-          
-          
+          ),         
           contentPadding: const EdgeInsets.all(24),
           content: SizedBox(
             width: MediaQuery.of(context).size.width * 0.35,
@@ -456,7 +457,7 @@ class _ReminderState extends State<Reminder> {
                     ],
                   ),
                   const SizedBox(height: 24),
-
+        //=======================TITLE FILED==============================
                   const Text('Title', style: labelStyle),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -464,7 +465,7 @@ class _ReminderState extends State<Reminder> {
                     decoration: customInputDecoration(),
                   ),
                   const SizedBox(height: 16),
-
+    //===================DESCRIPTION=========================================
                   const Text('Description', style: labelStyle),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -474,13 +475,14 @@ class _ReminderState extends State<Reminder> {
                     decoration: customInputDecoration( ),
                   ),
                   const SizedBox(height: 16),
-
+  //=========================PRIORITY=============================
                   const Text('Priority', style: labelStyle),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: prioritycontroller,
                     decoration: customInputDecoration(),
                   ),
+  //=========================AMOUNT================================
                   const SizedBox(height: 16),
                     const Text('Amount', style: labelStyle),
                   const SizedBox(height: 8),
@@ -488,7 +490,7 @@ class _ReminderState extends State<Reminder> {
                     controller: amountcontroller,
                     decoration: customInputDecoration(),
                   ),
-
+    //=======================DATE====================================
                   const Text('Date', style: labelStyle),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -530,7 +532,7 @@ class _ReminderState extends State<Reminder> {
                         elevation: 0,
                       ),
                       onPressed: () async {
-                        // CRITICAL FIX: Explicitly check selectedDate for null before execution
+                       
                         if (titlecontroller.text.trim().isEmpty ||
                             prioritycontroller.text.trim().isEmpty ||
                             selectedDate == null) {
@@ -555,6 +557,7 @@ class _ReminderState extends State<Reminder> {
                             ),
                           ),
                         );
+                        //=============================ADD REMINDER LOGIC==============================
 
                         try {
                           await bookingService.addReminder(
@@ -616,7 +619,7 @@ class _ReminderState extends State<Reminder> {
     });
   }
 
-  //Helper Method
+  //=====================Helper Method===================
 
  
 

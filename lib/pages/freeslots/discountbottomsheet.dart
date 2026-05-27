@@ -16,7 +16,7 @@ class DiscountBottomSheet extends StatefulWidget {
 }
 
 class _DiscountBottomSheetState extends State<DiscountBottomSheet> {
-  bool isPercentageSelected = true; // Tracks the tab selection
+  bool isPercentageSelected = true; 
   final TextEditingController _inputController = TextEditingController();
 
   @override
@@ -28,7 +28,7 @@ class _DiscountBottomSheetState extends State<DiscountBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      // Handles keyboard avoiding when input is focused
+      //=============== Handles keyboard avoiding when input is focused========================
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
         left: 16,
@@ -46,7 +46,7 @@ class _DiscountBottomSheetState extends State<DiscountBottomSheet> {
           ),
           const SizedBox(height: 16),
 
-          // Toggle Tabs (Percentage vs Fixed Price)
+          //=============== Toggle Tabs (Percentage vs Fixed Price)===========================
           Row(
             children: [
               Expanded(
@@ -67,7 +67,7 @@ class _DiscountBottomSheetState extends State<DiscountBottomSheet> {
           ),
           const SizedBox(height: 16),
 
-          // Input field and Action buttons
+          //============== Input field and Action buttons==========================
           Row(
             children: [
               Expanded(
@@ -85,6 +85,7 @@ class _DiscountBottomSheetState extends State<DiscountBottomSheet> {
                 ),
               ),
               const SizedBox(width: 12),
+              //==================APPLY BUTTON LOGIC==============================
               ElevatedButton(
                 onPressed: () async {
                   if (_inputController.text.trim().isEmpty) return;
@@ -121,6 +122,7 @@ class _DiscountBottomSheetState extends State<DiscountBottomSheet> {
                 ),
                 child: const Text('Apply'),
               ),
+              //======================== CANCEL BUTTON LOGIC===========================
               const SizedBox(width: 8),
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -145,7 +147,7 @@ class _DiscountBottomSheetState extends State<DiscountBottomSheet> {
     );
   }
 
-  // Custom helper widget to build the segmented toggle buttons
+  // ====================== helper widget to build the segmented toggle buttons==============================
   Widget _buildTabButton({
     required String title,
     required bool isSelected,

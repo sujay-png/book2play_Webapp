@@ -19,6 +19,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final ScrollController slotScrollController = ScrollController();
+  //==================TIME SLOT LIST====================================
   final List<SlotData> _slots = [
     SlotData(time: '06:00 AM - 07:00 AM', basePrice: 1000),
     SlotData(time: '07:00 AM - 08:00 AM', basePrice: 1000),
@@ -67,6 +68,7 @@ class _DashboardState extends State<Dashboard> {
                       fontSize: 25,
                     ),
                   ),
+                  //=========================ADD NEW GROUND BUTTON==================================
                   SizedBox(
                     width: 200,
                     height: 50,
@@ -104,7 +106,7 @@ class _DashboardState extends State<Dashboard> {
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
               SizedBox(height: 12),
-              //=============================== KPI Boxes Row ===============================
+              //=============================== KPI Boxes Row UPADATD ===============================
               StreamBuilder<Map<String, dynamic>>(
                 stream: FirebaseService().getDashboardMetricsStream(),
                 builder: (context, snapshot) {
@@ -212,7 +214,7 @@ class _DashboardState extends State<Dashboard> {
                       ),
                     ),
                     const SizedBox(height: 15),
-
+                    //===========================GET CUSTOMER BOOKINGS LIST=========================
                     StreamBuilder<List<CustomergroundDetails>>(
                       stream: FirebaseService().getAllCustomerBookings(),
                       builder: (context, snapshot) {
@@ -428,7 +430,7 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
-  //=========================Show popup form====================================
+  //=========================ADD GROUND  popup form====================================
 
   void _showGroundDialog(BuildContext context) {
     final FirebaseService bookingService = FirebaseService();
@@ -452,7 +454,7 @@ class _DashboardState extends State<Dashboard> {
           fontWeight: FontWeight.w500,
           color: Colors.white70,
         );
-
+//======================TEXTBOX DESIGN=================================
         InputDecoration customInputDecoration({
           String? hintText,
           Widget? suffixIcon,
@@ -517,10 +519,10 @@ class _DashboardState extends State<Dashboard> {
 
                       const SizedBox(height: 24),
 
-                      // Ground & Location Section
+                      //==================== Ground & Location Section=====================================
                       _buildSectionHeader('Ground & Location'),
                       const SizedBox(height: 12),
-
+                  //=======================GROUND NAME FIED==================================
                       const Text('Ground Name', style: labelStyle),
                       const SizedBox(height: 8),
                       TextFormField(
@@ -530,7 +532,7 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
                       const SizedBox(height: 16),
-
+                      //===================PLACE AND LOCATION=============================
                       const Text('Place/Location', style: labelStyle),
                       const SizedBox(height: 8),
                       TextFormField(
@@ -539,7 +541,7 @@ class _DashboardState extends State<Dashboard> {
                           hintText: 'e.g., Whitefield, Bangalore',
                         ),
                       ),
-
+                    //======================ADDRESS====================================
                       const SizedBox(height: 16),
                       const Text('Address', style: labelStyle),
                       const SizedBox(height: 8),
@@ -551,7 +553,7 @@ class _DashboardState extends State<Dashboard> {
 
                       const SizedBox(height: 16),
 
-                      // Duration & Amount Section
+                      //=======================Duration & Amount Section=============================
                       Row(
                         children: [
                           const SizedBox(width: 16),
@@ -587,6 +589,7 @@ class _DashboardState extends State<Dashboard> {
                             ),
                             elevation: 0,
                           ),
+                          //======================ADD GROUND LOGIC======================================
                           onPressed: () async {
                             // Validation
                             if (groundNameController.text.trim().isEmpty ||
@@ -613,7 +616,7 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                               ),
                             );
-
+                            //===================SAVE GROUND DETAILS===========================
                             try {
                               await bookingService.saveGroundBooking(
                                 groundName: groundNameController.text.trim(),
@@ -679,7 +682,7 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  // Helper widget for section headers
+  // ================Helper widget for section headers==================
   Widget _buildSectionHeader(String title) {
     return Text(
       title,

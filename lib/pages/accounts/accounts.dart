@@ -6,6 +6,7 @@ import 'package:booktoplay_webapp/service/firebaseservice.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+//==============FILTER LIST=============================
 const List<String> filterList = [
   'This Week',
   'Last Week',
@@ -35,7 +36,7 @@ class _AccountsState extends State<Accounts> {
     _transactionScrollController.dispose();
     super.dispose();
   }
-
+//============================FILTER METHOD===========================
   DateTimeRange _getDateRange(String filter) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -92,6 +93,7 @@ class _AccountsState extends State<Accounts> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //========================== BACK TO DASHBOARD BUTTON=======================
               SizedBox(
                 width: 180,
                 height: 50,
@@ -119,7 +121,7 @@ class _AccountsState extends State<Accounts> {
               ),
 
               const SizedBox(height: 15),
-
+              //========================GET BOOKINGS LIST=============================
               StreamBuilder<List<BookingModel>>(
                 stream: FirebaseService().getBookings(),
                 builder: (context, bookingSnapshot) {
@@ -131,7 +133,7 @@ class _AccountsState extends State<Accounts> {
                     0,
                     (sum, item) => sum + item.amount,
                   );
-
+                //===========================GET EXPENSES FROM REMIDER & KPI BOX UPDATE=============================
                   return StreamBuilder<List<Map<String, String>>>(
                     stream: FirebaseService().getReminderTitlesStream(),
                     builder: (context, expenseSnapshot) {
@@ -194,6 +196,7 @@ class _AccountsState extends State<Accounts> {
                             ),
                             child: Row(
                               children: [
+                                //=======================FILTER DATA METHOD======================
                                 SizedBox(
                                   width: 220,
                                   child: DropdownButtonFormField<String>(
@@ -213,9 +216,7 @@ class _AccountsState extends State<Accounts> {
                                       ),
                                     ),
                                     onChanged: (value) {
-                                      setState(() {
-                                        selectedFilter = value!;
-                                      });
+                                     
                                     },
                                     items: filterList.map((value) {
                                       return DropdownMenuItem(
@@ -340,6 +341,7 @@ class _AccountsState extends State<Accounts> {
                           ),
 
                           const SizedBox(height: 15),
+                          //==============================RECENT TRANSACTION TABLE==============================
 
                           if (selectedType == 0 || selectedType == 1)
                             Container(

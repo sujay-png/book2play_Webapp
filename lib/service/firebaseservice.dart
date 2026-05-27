@@ -13,7 +13,7 @@ import 'package:async/async.dart' show StreamZip;
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // ==================== BOOKING METHODS ====================
+  // ====================  ADD BOOKING  ====================
 
  Future<void> addBooking({
   required String name,
@@ -32,15 +32,13 @@ class FirebaseService {
     DateTime? finalInTimestamp;
     DateTime? finalOutTimestamp;
 
-    // If slot is selected, extract time from slot time string
+    
     if (selectedSlotTime != null && selectedSlotTime.isNotEmpty) {
-      // Parse slot time like "06:00 AM - 07:00 AM"
+  
       final times = selectedSlotTime.split(' - ');
       if (times.length == 2) {
         final startTimeStr = times[0].trim();
         final endTimeStr = times[1].trim();
-
-        // Parse start time
         final startTime = _parseTimeString(startTimeStr);
         if (startTime != null) {
           finalInTimestamp = DateTime(
@@ -51,8 +49,6 @@ class FirebaseService {
             startTime.minute,
           );
         }
-
-        // Parse end time
         final endTime = _parseTimeString(endTimeStr);
         if (endTime != null) {
           finalOutTimestamp = DateTime(
@@ -65,7 +61,6 @@ class FirebaseService {
         }
       }
     } else if (inTime != null && outTime != null) {
-      // Fallback to manually selected times if no slot selected
       finalInTimestamp = DateTime(
         date.year,
         date.month,
@@ -84,7 +79,7 @@ class FirebaseService {
     }
 
     final booking = BookingModel(
-      id: '', // Firestore will generate this
+      id: '', 
       customerName: name,
       phoneNumber: phone,
       sport: sport,
@@ -116,7 +111,6 @@ class FirebaseService {
   }
 }
 
-/// Helper method to parse time strings like "06:00 AM"
 TimeOfDay? _parseTimeString(String timeStr) {
   try {
     final parts = timeStr.split(':');
@@ -198,8 +192,7 @@ TimeOfDay? _parseTimeString(String timeStr) {
   });
 }
 
-
-/// Fetch bookings as typed models
+//=============================FETCH BOOKINGS=========================================
 Stream<List<BookingModel>> getBookingsStream({
   DateTime? startDate,
   DateTime? endDate,
@@ -231,7 +224,7 @@ Stream<List<BookingModel>> getBookingsStream({
     },
   );
 }
-  /// Delete booking by document ID
+//===================================== DELETE BOOKINGS========================================
   Future<void> deleteBooking(String docId) async {
     try {
       await _firestore.collection('bookings').doc(docId).delete();
@@ -240,7 +233,7 @@ Stream<List<BookingModel>> getBookingsStream({
     }
   }
 
-  // ==================== REMINDER METHODS ====================
+  // ==================== ADD  REMINDER========================
 
   Future<void> addReminder({
     required String name,
@@ -267,14 +260,14 @@ Stream<List<BookingModel>> getBookingsStream({
     }
   }
 
-  //================== Update reminder's done status============================
+  //================== UPDATE REMINDER STATUS ============================
   Future<void> markReminderAsDone(String id) async {
     await FirebaseFirestore.instance.collection('reminders').doc(id).update({
       'isDone': true,
     });
   }
 
-  /// Fetch reminders as typed models
+  //===========================FETCH REMINDER============================
   Stream<List<ReminderModel>> getRemindersStream() {
     return FirebaseFirestore.instance.collection('reminders').snapshots().map((
       snapshot,
@@ -287,7 +280,7 @@ Stream<List<BookingModel>> getBookingsStream({
     });
   }
 
-  /// Delete reminder by document ID
+  //=========================DELETE REMINDER=========================
   Future<void> deleteReminder(String docId) async {
     try {
       await _firestore.collection('reminders').doc(docId).delete();
@@ -295,7 +288,7 @@ Stream<List<BookingModel>> getBookingsStream({
       throw Exception("Firebase Delete Failed: $e");
     }
   }
-  //=============================Fetch Expenses from reminders=============================
+  //=============================FETCH EXPENCE FROM REMINDER =============================
 
   Stream<List<Map<String, dynamic>>> getReminderAmountStream() {
     return FirebaseFirestore.instance.collection('reminders').snapshots().map((
@@ -326,7 +319,7 @@ Stream<List<BookingModel>> getBookingsStream({
       }).toList();
     });
   }
-  // ==================== EVENT METHODS ====================
+  // ====================ADD  EVENT ====================
 
   /// Add a new event to Firestore
   Future<void> addEvent({
@@ -389,7 +382,7 @@ Stream<List<BookingModel>> getBookingsStream({
     }
   }
 
-  /// Fetch events as typed models
+  //=======================FETCH EVENTS ====================================
   Stream<List<EventModel>> getEventsStream() {
     return _firestore
         .collection('events')
@@ -407,7 +400,7 @@ Stream<List<BookingModel>> getBookingsStream({
         });
   }
 
-  // ==================== EVENT POST METHODS ====================
+  // ==================== ADD EVENT POST  ====================
 
   Future<void> saveEventPost({
     required String title,
@@ -433,12 +426,12 @@ Stream<List<BookingModel>> getBookingsStream({
       }
 
       final eventPost = EventPostModel(
-        id: '', // Firestore will generate this
+        id: '', 
         eventTitle: title,
         description: description,
         sport: sport,
-        maxParticipants: maxParticipants, // Now properly typed as int
-        entryFee: entryFee, // Now properly typed as double
+        maxParticipants: maxParticipants,
+        entryFee: entryFee, 
         prizes: prizes,
         bookingDate: date,
         inTime: finalInTimestamp,
@@ -451,7 +444,8 @@ Stream<List<BookingModel>> getBookingsStream({
     }
   }
 
-  /// Fetch all event posts as typed models
+
+  //===================FETCH EVENT POST==============================
   Stream<List<EventPostModel>> getEventPostsStream() {
     return _firestore
         .collection('eventpost')
@@ -469,7 +463,7 @@ Stream<List<BookingModel>> getBookingsStream({
         });
   }
 
-  // ==================== FREE SLOT METHODS ====================
+  // ==================== ADD FREE SLOT  ====================
 
   Future<void> addFreeSlot({
     required String amount,
@@ -493,7 +487,7 @@ Stream<List<BookingModel>> getBookingsStream({
       }
 
       final freeSlot = FreeSlotModel(
-        id: '', // Firestore will generate this
+        id: '', 
         amount: double.tryParse(amount) ?? 0.0,
         inTime: finalInTimestamp,
         outTime: finalOutTimestamp,
@@ -506,7 +500,7 @@ Stream<List<BookingModel>> getBookingsStream({
     }
   }
 
-  /// Fetch free slots as typed models
+  //========================FETCH FREESLOTS ===============================
   Stream<List<FreeSlotModel>> getFreeSlotsStream() {
     return _firestore
         .collection('freeslots')
@@ -524,7 +518,7 @@ Stream<List<BookingModel>> getBookingsStream({
         });
   }
 
-  /// Delete free slot by document ID
+  //=====================DELETE SLOTS======================
   Future<void> deleteFreeSlot(String docId) async {
     try {
       await _firestore.collection('freeslots').doc(docId).delete();
@@ -576,7 +570,7 @@ Stream<List<Bookground>> getGroundBookingsStream() {
       });
 }
 
-//=======================Dashboard details=====================
+//======================= GET Dashboard details=====================
 Stream<Map<String, dynamic>> getDashboardMetricsStream() {
   final now = DateTime.now();
   final startOfToday = DateTime(now.year, now.month, now.day);
@@ -669,7 +663,7 @@ Stream<Map<String, dynamic>> getDashboardMetricsStream() {
   });
 }
 
-//Get customer ground bookings details
+//===========================Get customer ground bookings details=============================
 Stream<List<BookingModel>> getBookings() {
   return FirebaseFirestore.instance
       .collection('custgrounddetails')
@@ -699,7 +693,7 @@ Stream<List<CustomergroundDetails>> getAllCustomerBookings() {
   });
 }
 
-//sort time according to the date
+//======================sort time according to the date============================
 Stream<List<String>> getBookedSlotsByDate(DateTime selectedDate) {
   final startDate = DateTime(
     selectedDate.year,
@@ -731,7 +725,7 @@ Stream<List<String>> getBookedSlotsByDate(DateTime selectedDate) {
   });
 }
 
-//save slotdiscount
+//=======================save slotdiscount=============================
 
 Future<void> saveSlotDiscount(
   SlotDiscountModel discount,
@@ -750,7 +744,7 @@ Future<void> saveSlotDiscount(
         SetOptions(merge: true),
       );
 }
-//read saved discount slots
+//==============================FETCH saved discount slots======================================
 Stream<List<SlotDiscountModel>> getSlotDiscountsStream(
   DateTime selectedDate,
 ) {
@@ -781,7 +775,7 @@ Stream<List<SlotDiscountModel>> getSlotDiscountsStream(
   });
 }
 
-//Get All Bookings
+//===========================Get All Bookings===================================
 
 Stream<List<BookingModel>> getAllBookings() {
   return FirebaseFirestore.instance
